@@ -1,7 +1,7 @@
-# OPNLend — Reputation-Weighted Lending on OPN Chain
+# OPNLend | Reputation-Weighted Lending on OPN Chain
 
-Borrow against your on-chain reputation, not just your collateral. Built for the
-**OPN Builders Programme — Season 1: DeFi & Open Finance**.
+Borrow against your on-chain reputation, not just your collateral.
+**OPN Builders Programme - Season 1: DeFi & Open Finance**.
 
 ---
 
@@ -81,8 +81,8 @@ Add this network to your wallet manually if it isn't added automatically when yo
 
 ## Pages
 
-- `/` — landing page, protocol overview
-- `/dashboard` — supply, collateral, borrow/repay, liquidations
-- `/profile` — your credit score, breakdown, and reputation simulator
-- `/leaderboard` — all wallets ranked by score (discovered from on-chain events)
-- `/activity` — live protocol event feed
+- `/` - landing page, protocol overview
+- `/dashboard` - supply, collateral, borrow/repay, liquidations
+- `/profile` - your credit score, breakdown, and reputation simulator
+- `/leaderboard` - all wallets ranked by score (discovered from on-chain events)
+- `/activity` - live protocol event feed
