@@ -68,7 +68,7 @@ contract CreditScore is Ownable {
         liquidator = _liquidator;
     }
 
-    // ─── Initialization ────────────────────────────────────────────────────────
+    //  Initialization 
 
     function initWallet(address wallet) external onlyAuthorized {
         if (!walletData[wallet].initialized) {
@@ -84,7 +84,7 @@ contract CreditScore is Ownable {
         }
     }
 
-    // ─── Score Updates ─────────────────────────────────────────────────────────
+    //  Score Updates 
 
     function recordRepayment(address wallet) external onlyAuthorized {
         _ensureInit(wallet);
@@ -119,7 +119,7 @@ contract CreditScore is Ownable {
         emit TxCountUpdated(wallet, txCount);
     }
 
-    // ─── Score Computation ─────────────────────────────────────────────────────
+    //  Score Computation 
 
     function getScore(address wallet) public view returns (uint256) {
         WalletData memory d = walletData[wallet];

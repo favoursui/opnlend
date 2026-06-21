@@ -31,7 +31,7 @@ export default function SupplyPanel() {
   return (
     <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 700, fontSize: "0.875rem" }}>
-        <span style={{ color: "var(--accent)" }}>⚡</span> Earn — supply liquidity (IOPN)
+        <span style={{ color: "var(--accent)" }}>⚡</span> Earn / supply liquidity (IOPN)
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>

@@ -6,6 +6,7 @@ import { wagmiConfig } from "@/config/wagmi";
 import Navbar from "@/components/layout/Navbar";
 import "@rainbow-me/rainbowkit/styles.css";
 import "@/styles/globals.css";
+import Head from "next/head";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,9 @@ export default function App({ Component, pageProps }: AppProps) {
             borderRadius: "medium",
           })}
         >
+          <Head>
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
           <Navbar />
           <main style={{ maxWidth: 1180, margin: "0 auto", padding: "2rem 1.5rem" }}>
             <Component {...pageProps} />

@@ -1,0 +1,10 @@
+{
+  "oracle": "0x4b54847CBC704880C63ED4E283415902a2D3D7Eb",
+  "creditScore": "0xB0a6de130c4788726115B79C53d5df38471339dA",
+  "lendingPool": "0x04B22bC460E1F34E605664794E08568d0BCba543",
+  "loanManager": "0xdB7DEa98B3bA6a655A5D9f5B1F8A07a1b245a5cf",
+  "liquidator": "0xC447d237d7934deB1E329e7358d779fD749CF7A1",
+  "network": "opn_testnet",
+  "chainId": 984,
+  "deployedAt": "2026-06-21T10:08:22.150Z"
+}

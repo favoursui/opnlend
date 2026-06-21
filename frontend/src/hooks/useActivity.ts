@@ -28,12 +28,15 @@ export function useActivity(account?: `0x${string}`) {
           { name: "Liquidated", type: "LIQUIDATE" },
         ];
 
+        const currentBlock = await client.getBlockNumber();
+        const fromBlock = currentBlock > 9000n ? currentBlock - 9000n : 0n;
+
         const allLogs = await Promise.all(
           eventDefs.map(({ name }) =>
             client.getLogs({
               address: CONTRACTS.lendingPool,
               event: LENDING_POOL_ABI.find((e) => e.name === name) as any,
-              fromBlock: 0n,
+              fromBlock,
               toBlock: "latest",
             })
           )

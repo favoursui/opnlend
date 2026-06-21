@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+
 import { useRouter } from "next/router";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { LayoutGrid, CircleUser, Trophy, Activity } from "lucide-react";
@@ -38,19 +40,10 @@ export default function Navbar() {
         }}
       >
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <div
-            style={{
-              width: 24, height: 24, borderRadius: 6,
-              background: "var(--accent)", color: "#050f0f",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontWeight: 800, fontSize: "0.75rem",
-            }}
-          >
-            R
+          <div>
+            <Image src="/opnlend_logo_v2.svg" alt="OPNLend" width={140} height={40} />
           </div>
-          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--text-primary)" }}>
-            OPNLend{!onLanding && <span style={{ color: "var(--text-muted)", fontWeight: 400 }}> </span>}
-          </span>
+         
         </Link>
 
         {!onLanding && (

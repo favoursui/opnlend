@@ -31,7 +31,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
     PriceOracle public oracle;
     CreditScore public creditScore;
 
-    // ─── Lender (supply) side ──────────────────────────────────────────────────
+    //  Lender (supply) side 
     struct SupplyInfo {
         uint256 shares;      // pool shares owned
         uint256 principal;   // net principal deposited (for yield-earned accounting)
@@ -41,7 +41,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
     uint256 public totalSupplied;  // total assets owned by suppliers (principal + accrued interest)
     uint256 public totalShares;
 
-    // ─── Borrower side ─────────────────────────────────────────────────────────
+    //  Borrower side 
     struct Position {
         uint256 collateral;  // OPN deposited as collateral
         uint256 scaledDebt;  // debt normalised to borrowIndex; actual debt = scaledDebt × borrowIndex / 1e18
@@ -51,11 +51,11 @@ contract LendingPool is Ownable, ReentrancyGuard {
     uint256 public totalCollateral;
     uint256 public totalScaledDebt;
 
-    // ─── Interest accrual ────────────────────────────────────────────────────────
+    //  Interest accrual 
     uint256 public borrowIndex = 1e18;
     uint256 public lastAccrualTime;
 
-    // ─── Rates ─────────────────────────────────────────────────────────────────
+    //  Rates 
     uint256 public constant BASE_BORROW_APR_BPS = 438;        // 4.38%
     uint256 public constant LIQUIDATION_THRESHOLD_BPS = 8300; // 83%
     uint256 public constant LIQUIDATION_BONUS_BPS = 800;      // 8%
@@ -92,7 +92,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
     function setLoanManager(address _loanManager) external onlyOwner { loanManager = _loanManager; }
     function setLiquidator(address _liquidator) external onlyOwner { liquidator = _liquidator; }
 
-    // ─── Interest accrual ────────────────────────────────────────────────────────
+    //  Interest accrual 
 
     /// @notice Fold accrued interest into borrowIndex and credit suppliers. Idempotent within a block.
     function accrueInterest() public {
@@ -109,7 +109,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         lastAccrualTime = block.timestamp;
     }
 
-    // ─── Supply (lend) ─────────────────────────────────────────────────────────
+    //  Supply (lend) 
 
     function supply() external payable nonReentrant {
         require(msg.value > 0, "LendingPool: zero");
@@ -149,12 +149,17 @@ contract LendingPool is Ownable, ReentrancyGuard {
         accrueInterest();
         SupplyInfo storage s = suppliers[msg.sender];
         require(s.shares > 0, "LendingPool: nothing supplied");
-        uint256 value = (s.shares * totalSupplied) / totalShares;
+        
+        // Use live supplied (including pending interest) to match UI calculation
+        uint256 pendingBorrowed = (totalScaledDebt * _currentBorrowIndex()) / 1e18;
+        uint256 stored = _storedTotalBorrowed();
+        uint256 liveSupplied = totalSupplied + (pendingBorrowed > stored ? pendingBorrowed - stored : 0);
+        uint256 value = (s.shares * liveSupplied) / totalShares;
         require(value > s.principal, "LendingPool: no yield");
         uint256 earned = value - s.principal;
         require(availableLiquidity() >= earned, "LendingPool: insufficient liquidity");
 
-        uint256 sharesToBurn = (earned * totalShares) / totalSupplied;
+        uint256 sharesToBurn = (earned * totalShares) / liveSupplied;
         s.shares -= sharesToBurn;
         s.lastUpdated = block.timestamp;
         totalShares -= sharesToBurn;
@@ -165,7 +170,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit YieldClaimed(msg.sender, earned);
     }
 
-    // ─── Collateral ────────────────────────────────────────────────────────────
+    //  Collateral 
 
     function depositCollateral() external payable nonReentrant {
         require(msg.value > 0, "LendingPool: zero");
@@ -194,7 +199,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit CollateralWithdrawn(msg.sender, amount);
     }
 
-    // ─── Borrow / Repay ────────────────────────────────────────────────────────
+    //  Borrow / Repay 
 
     function borrow(address borrower, uint256 amount) external onlyAuthorized nonReentrant {
         accrueInterest();
@@ -225,7 +230,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit Repaid(borrower, repayAmount);
     }
 
-    // ─── Liquidation ───────────────────────────────────────────────────────────
+    //  Liquidation 
 
     function liquidate(address borrower, address liquidatorAddr) external payable onlyAuthorized nonReentrant returns (uint256 collateralSeized) {
         accrueInterest();
@@ -254,7 +259,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         emit Liquidated(borrower, liquidatorAddr, debt, collateralSeized);
     }
 
-    // ─── Internal debt helpers ───────────────────────────────────────────────────
+    //  Internal debt helpers 
 
     function _currentDebt(address user) internal view returns (uint256) {
         return (positions[user].scaledDebt * _currentBorrowIndex()) / 1e18;
@@ -281,7 +286,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         return borrowIndex + (interest * 1e18) / borrowed;
     }
 
-    // ─── Views ─────────────────────────────────────────────────────────────────
+    //  Views 
 
     function borrowLimit(address user) public view returns (uint256) {
         Position memory pos = positions[user];
