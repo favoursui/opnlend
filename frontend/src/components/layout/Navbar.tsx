@@ -95,7 +95,13 @@ export default function Navbar() {
             flexDirection: "column",
             padding: "0.5rem 1rem 1rem",
             borderTop: "1px solid var(--border)",
-            background: "rgba(5,15,15,0.95)",
+            background: "rgba(5,15,15,0.97)",
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            right: 0,
+            zIndex: 100,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
           }}
         >
           {NAV.map((item) => {

@@ -22,7 +22,7 @@ export default function Dashboard() {
         <PoolOverview />
         <YourPosition />
 
-        <div className="dashboard-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.25rem" }}>
+        <div className="dashboard-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1.25rem" }}>
           <CollateralPanel />
           <BorrowRepayPanel />
           <SupplyPanel />
