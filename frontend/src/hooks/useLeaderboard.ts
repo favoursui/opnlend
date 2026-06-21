@@ -19,6 +19,7 @@ export function useLeaderboard() {
     if (!client || !CONTRACTS.lendingPool) return;
 
     async function load() {
+      if (!client) return;
       setLoading(true);
       try {
         const currentBlock = await client.getBlockNumber();

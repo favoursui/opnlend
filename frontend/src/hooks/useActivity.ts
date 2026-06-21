@@ -19,6 +19,7 @@ export function useActivity(account?: `0x${string}`) {
     if (!client || !CONTRACTS.lendingPool) return;
 
     async function load() {
+      if (!client) return;
       setLoading(true);
       try {
         const eventDefs: { name: string; type: ActivityEvent["type"] }[] = [
@@ -30,6 +31,7 @@ export function useActivity(account?: `0x${string}`) {
         ];
 
         const currentBlock = await client.getBlockNumber();
+
         const fromBlock = currentBlock > 9000n ? currentBlock - 9000n : 0n;
 
         const allLogs = await Promise.all(
