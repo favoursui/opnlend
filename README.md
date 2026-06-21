@@ -47,7 +47,6 @@ npm install
 cp .env.example .env
 # Add your burner wallet's private key to .env
 
-npx hardhat test
 npx hardhat run scripts/deploy.js --network opn_testnet
 ```
 
@@ -68,12 +67,12 @@ npm run dev   # http://localhost:3000
 
 ## Network details (OPN Chain Testnet)
 
-| Field          | Value                              |
+| Field          | Value                               |
 |----------------|-------------------------------------|
-| Chain ID       | 984                                  |
-| RPC URL        | https://testnet-rpc.iopn.tech        |
-| Currency       | IOPN                                 |
-| Block Explorer | https://testnet.opnscan.io           |
+| Chain ID       | 984                                 |
+| RPC URL        | https://testnet-rpc.iopn.tech       |
+| Currency       | IOPN                                |
+| Block Explorer | https://testnet.iopn.tech           |
 
 Add this network to your wallet manually if it isn't added automatically when you connect.
 
@@ -84,5 +83,5 @@ Add this network to your wallet manually if it isn't added automatically when yo
 - `/` - landing page, protocol overview
 - `/dashboard` - supply, collateral, borrow/repay, liquidations
 - `/profile` - your credit score, breakdown, and reputation simulator
-- `/leaderboard` - all wallets ranked by score (discovered from on-chain events)
+- `/leaderboard` - all wallets ranked by score (discovered from on-chain event on OPLEND)
 - `/activity` - live protocol event feed
