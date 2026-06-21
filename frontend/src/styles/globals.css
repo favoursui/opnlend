@@ -148,6 +148,7 @@ body {
 .event-borrow   { background: rgba(99,102,241,0.15); color: #818cf8; }
 .event-repay    { background: rgba(96,165,250,0.15); color: #60a5fa; }
 .event-liquidate { background: rgba(239,68,68,0.15); color: #ef4444; }
+.event-claim { background: rgba(245,158,11,0.15); color: #f59e0b; }
 
 /* Nav */
 .nav-link {
@@ -210,3 +211,5 @@ body {
 }
 .table tr:last-child td { border-bottom: none; }
 .table tr:hover td { background: var(--bg-card-hover); }
+
+

@@ -1,6 +1,9 @@
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { tierLabel, tierClass, shortenAddress } from "@/config/contracts";
 import { useAccount } from "wagmi";
+import { Crown } from "lucide-react";
+
+const CROWN_COLORS = ["#ffd700", "#c0c0c0", "#cd7f32"]; // gold, silver, bronze
 
 export default function LeaderboardTable() {
   const { entries, loading } = useLeaderboard();
@@ -29,8 +32,6 @@ export default function LeaderboardTable() {
           <tr>
             <th>#</th>
             <th>Wallet</th>
-            <th>Activity</th>
-            <th>Breakdown</th>
             <th>Score</th>
             <th>Tier</th>
           </tr>
@@ -38,9 +39,15 @@ export default function LeaderboardTable() {
         <tbody>
           {entries.map((e, i) => {
             const isYou = address && e.address.toLowerCase() === address.toLowerCase();
+            const crownColor = i < 3 ? CROWN_COLORS[i] : null;
             return (
               <tr key={e.address}>
-                <td style={{ color: "var(--text-muted)" }}>{i + 1}</td>
+                <td style={{ color: "var(--text-muted)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    {crownColor && <Crown size={14} color={crownColor} fill={crownColor} />}
+                    {i + 1}
+                  </div>
+                </td>
                 <td>
                   <div style={{ fontWeight: 600 }}>
                     {isYou ? "You" : shortenAddress(e.address)}
@@ -48,10 +55,6 @@ export default function LeaderboardTable() {
                   <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontFamily: "monospace" }}>
                     {shortenAddress(e.address)}
                   </div>
-                </td>
-                <td style={{ fontWeight: 700 }}>{e.activity} actions</td>
-                <td style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                  {e.supplies}S · {e.borrows}B · {e.repays}R{e.liquidations > 0 ? ` · ${e.liquidations}L` : ""}
                 </td>
                 <td style={{ fontWeight: 700 }}>{e.score}</td>
                 <td>

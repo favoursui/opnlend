@@ -32,6 +32,7 @@ export const LENDING_POOL_ABI = [
   { name: "Repaid",            type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
   { name: "Liquidated",        type: "event", inputs: [{ name: "borrower", type: "address", indexed: true }, { name: "liquidator", type: "address", indexed: true }, { name: "debtRepaid", type: "uint256" }, { name: "collateralSeized", type: "uint256" }] },
   { name: "CollateralDeposited", type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
+  { name: "YieldClaimed", type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
 ] as const;
 
 export const LOAN_MANAGER_ABI = [

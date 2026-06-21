@@ -6,6 +6,7 @@ const TYPE_LABEL: Record<string, string> = {
   BORROW: "Borrow",
   REPAY: "Repay",
   LIQUIDATE: "Liquidate",
+  CLAIM: "ClaimYield",
 };
 
 const TYPE_CLASS: Record<string, string> = {
@@ -13,7 +14,9 @@ const TYPE_CLASS: Record<string, string> = {
   BORROW: "event-borrow",
   REPAY: "event-repay",
   LIQUIDATE: "event-liquidate",
+  CLAIM: "event-claim",
 };
+
 
 export default function ActivityFeed({ account }: { account?: `0x${string}` }) {
   const { events, loading } = useActivity(account);

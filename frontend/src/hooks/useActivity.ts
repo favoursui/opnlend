@@ -3,7 +3,7 @@ import { usePublicClient } from "wagmi";
 import { CONTRACTS, LENDING_POOL_ABI, formatOPN } from "@/config/contracts";
 
 export interface ActivityEvent {
-  type: "SUPPLY" | "BORROW" | "REPAY" | "LIQUIDATE";
+  type: "SUPPLY" | "BORROW" | "REPAY" | "LIQUIDATE" | "CLAIM";
   address: string;
   amount: string;
   timestamp: number;
@@ -26,6 +26,7 @@ export function useActivity(account?: `0x${string}`) {
           { name: "Borrowed", type: "BORROW" },
           { name: "Repaid", type: "REPAY" },
           { name: "Liquidated", type: "LIQUIDATE" },
+          { name: "YieldClaimed", type: "CLAIM" },
         ];
 
         const currentBlock = await client.getBlockNumber();
