@@ -237,6 +237,11 @@ body {
   .nav-links-desktop { display: none !important; }
   .nav-hamburger { display: flex !important; align-items: center; justify-content: center; }
   .nav-mobile-menu { display: flex !important; }
+  footer > div {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center;
+  }
 }
 
 @media (max-width: 640px) {
