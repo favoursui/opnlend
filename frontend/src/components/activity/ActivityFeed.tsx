@@ -6,7 +6,7 @@ const TYPE_LABEL: Record<string, string> = {
   BORROW: "Borrow",
   REPAY: "Repay",
   LIQUIDATE: "Liquidate",
-  CLAIM: "ClaimYield",
+  CLAIM: "Claim",
 };
 
 const TYPE_CLASS: Record<string, string> = {
@@ -43,7 +43,7 @@ export default function ActivityFeed({ account }: { account?: `0x${string}` }) {
         <div
           key={`${e.txHash}-${i}`}
           className="card"
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
             <span className={`event-badge ${TYPE_CLASS[e.type]}`}>{TYPE_LABEL[e.type]}</span>

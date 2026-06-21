@@ -25,7 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <Navbar />
-          <main style={{ maxWidth: 1180, margin: "0 auto", padding: "2rem 1.5rem" }}>
+          <main style={{ maxWidth: 1180, margin: "0 auto", padding: "2rem 1.5rem", width: "100%" }}>
             <Component {...pageProps} />
           </main>
         </RainbowKitProvider>
