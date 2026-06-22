@@ -38,6 +38,13 @@ liquidationThreshold = 83%   liquidationBonus = 8%
 
 ---
 
+
+## generate cron_secret
+```bash
+openssl rand -hex 16
+
+```
+
 ## Setup
 
 ### 1. Contracts
@@ -85,3 +92,5 @@ Add this network to your wallet manually if it isn't added automatically when yo
 - `/profile` - your credit score, breakdown, and reputation simulator
 - `/leaderboard` - all wallets ranked by score (discovered from on-chain event on OPLEND)
 - `/activity` - live protocol event feed
+- `/stats` - complete protocol stats / no button leads to this page, not visible to users, only protocol admins hits this route ( protocol txns  monitoring)
+
