@@ -8,15 +8,32 @@ Borrow against your on-chain reputation, not just your collateral.
 ## How it works
 
 Every wallet has a credit score (0–1000) computed from on-chain activity:
-tx count, wallet age, loan repayment history, and liquidations. Your score
-places you in a tier that multiplies your borrowing power and adjusts your APR.
+tx count, wallet age, and protocol behaviour (supplies, deposits, borrows,
+repayments, liquidations). Your score places you in a tier that multiplies your
+borrowing power and adjusts your APR.
+
+**Scoring**
+
+| Signal                     | Points        |
+|----------------------------|---------------|
+| Baseline                   | +200          |
+| Active wallet (tx ≥ 10)    | +25           |
+| Loan repayment             | +20 each      |
+| Supply                     | +10 each      |
+| Collateral deposit         | +10 each      |
+| Borrow                     | +10 each      |
+| Yield claim                | +0            |
+| Long-term wallet (≥ 180d)  | +25           |
+| Liquidation                | −200 each     |
+
+**Tiers**
 
 | Tier      | Score    | Borrow Multiplier | APR Adjustment |
 |-----------|----------|--------------------|-----------------|
-| Prime     | 800–1000 | ×1.5               | −2.0%           |
-| Neutral   | 500–799  | ×1.0               | base            |
-| Subprime  | 300–499  | ×0.75              | +3.0%           |
-| High Risk | 0–299    | ×0.5               | +8.0%           |
+| Prime     | 1000     | ×1.5               | −2.0%           |
+| Neutral   | 320–999  | ×1.0               | base            |
+| Subprime  | 250–319  | ×0.75              | +3.0%           |
+| High Risk | 0–249    | ×0.5               | +8.0%           |
 
 ```
 effectiveBorrowLimit = collateral × 75% (CF) × repMultiplier

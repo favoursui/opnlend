@@ -9,23 +9,30 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * Score range: 0–1000
  *
  * Scoring breakdown:
- *   Baseline:                  +400
- *   Active wallet (tx >= 10):  +100
- *   Loan repayment history:    +50 per repayment (max +300)
- *   Long-term wallet (>=180d): +200
- *   Liquidations:              -400 each (clamped to 0)
+ *   Baseline:                  +200
+ *   Active wallet (tx >= 10):  +25
+ *   Loan repayment:            +20 per repayment
+ *   Supply:                    +10 per supply  (reversed on withdrawal)
+ *   Collateral deposit:        +10 per deposit (reversed on withdrawal)
+ *   Borrow:                    +10 per borrow
+ *   Yield claim:               +0   (no score effect)
+ *   Long-term wallet (>=180d): +25
+ *   Liquidations:              -200 each (clamped to 0)
  *
  * Tiers:
- *   Prime     800–1000  ×1.5 borrow multiplier  -2% APR discount
- *   Neutral   500–799   ×1.0                     base APR
- *   Subprime  300–499   ×0.75                    +3% APR surcharge
- *   High Risk 0–299     ×0.5                     +8% APR surcharge
+ *   Prime     1000      ×1.5 borrow multiplier  -2% APR discount
+ *   Neutral   320–999   ×1.0                     base APR
+ *   Subprime  250–319   ×0.75                    +3% APR surcharge
+ *   High Risk 0–249     ×0.5                     +8% APR surcharge
  */
 contract CreditScore is Ownable {
     struct WalletData {
         uint256 txCount;
         uint256 firstSeenTimestamp;
         uint256 totalRepayments;
+        uint256 totalSupplies;
+        uint256 totalDeposits;
+        uint256 totalBorrows;
         uint256 liquidations;
         uint256 lastUpdated;
         bool initialized;
@@ -35,15 +42,18 @@ contract CreditScore is Ownable {
 
     address public loanManager;
     address public liquidator;
+    address public lendingPool;
 
-    uint256 public constant BASELINE = 400;
-    uint256 public constant ACTIVE_WALLET_BONUS = 100;
+    uint256 public constant BASELINE = 200;
+    uint256 public constant ACTIVE_WALLET_BONUS = 25;
     uint256 public constant ACTIVE_WALLET_TX_THRESHOLD = 10;
-    uint256 public constant REPAYMENT_BONUS = 50;
-    uint256 public constant MAX_REPAYMENT_BONUS = 300;
-    uint256 public constant LONGTERM_BONUS = 200;
+    uint256 public constant REPAYMENT_BONUS = 20;
+    uint256 public constant SUPPLY_BONUS = 10;
+    uint256 public constant DEPOSIT_BONUS = 10;
+    uint256 public constant BORROW_BONUS = 10;
+    uint256 public constant LONGTERM_BONUS = 25;
     uint256 public constant LONGTERM_THRESHOLD = 180 days;
-    uint256 public constant LIQUIDATION_PENALTY = 400;
+    uint256 public constant LIQUIDATION_PENALTY = 200;
     uint256 public constant MAX_SCORE = 1000;
 
     event WalletInitialized(address indexed wallet, uint256 timestamp);
@@ -52,7 +62,10 @@ contract CreditScore is Ownable {
 
     modifier onlyAuthorized() {
         require(
-            msg.sender == loanManager || msg.sender == liquidator || msg.sender == owner(),
+            msg.sender == loanManager ||
+                msg.sender == liquidator ||
+                msg.sender == lendingPool ||
+                msg.sender == owner(),
             "CreditScore: unauthorized"
         );
         _;
@@ -68,23 +81,20 @@ contract CreditScore is Ownable {
         liquidator = _liquidator;
     }
 
-    //  Initialization 
+    function setLendingPool(address _lendingPool) external onlyOwner {
+        lendingPool = _lendingPool;
+    }
+
+    //  Initialization
 
     function initWallet(address wallet) external onlyAuthorized {
         if (!walletData[wallet].initialized) {
-            walletData[wallet] = WalletData({
-                txCount: 0,
-                firstSeenTimestamp: block.timestamp,
-                totalRepayments: 0,
-                liquidations: 0,
-                lastUpdated: block.timestamp,
-                initialized: true
-            });
+            _init(wallet);
             emit WalletInitialized(wallet, block.timestamp);
         }
     }
 
-    //  Score Updates 
+    //  Score Updates
 
     function recordRepayment(address wallet) external onlyAuthorized {
         _ensureInit(wallet);
@@ -93,9 +103,47 @@ contract CreditScore is Ownable {
         emit ScoreUpdated(wallet, getScore(wallet));
     }
 
+    function recordSupply(address wallet) external onlyAuthorized {
+        _ensureInit(wallet);
+        walletData[wallet].totalSupplies += 1;
+        walletData[wallet].lastUpdated = block.timestamp;
+        emit ScoreUpdated(wallet, getScore(wallet));
+    }
+
+    function recordDeposit(address wallet) external onlyAuthorized {
+        _ensureInit(wallet);
+        walletData[wallet].totalDeposits += 1;
+        walletData[wallet].lastUpdated = block.timestamp;
+        emit ScoreUpdated(wallet, getScore(wallet));
+    }
+
+    /// @notice Reverse one supply bonus when a lender withdraws. Floored at 0 so a
+    /// wallet can never go negative (e.g. withdrawing more times than it supplied).
+    function recordSupplyWithdrawal(address wallet) external onlyAuthorized {
+        _ensureInit(wallet);
+        if (walletData[wallet].totalSupplies > 0) {
+            walletData[wallet].totalSupplies -= 1;
+        }
+        walletData[wallet].lastUpdated = block.timestamp;
+        emit ScoreUpdated(wallet, getScore(wallet));
+    }
+
+    /// @notice Reverse one collateral-deposit bonus when a borrower withdraws
+    /// collateral. Floored at 0 for the same reason as supply withdrawals.
+    function recordCollateralWithdrawal(address wallet) external onlyAuthorized {
+        _ensureInit(wallet);
+        if (walletData[wallet].totalDeposits > 0) {
+            walletData[wallet].totalDeposits -= 1;
+        }
+        walletData[wallet].lastUpdated = block.timestamp;
+        emit ScoreUpdated(wallet, getScore(wallet));
+    }
+
     function recordBorrow(address wallet) external onlyAuthorized {
         _ensureInit(wallet);
+        walletData[wallet].totalBorrows += 1;
         walletData[wallet].lastUpdated = block.timestamp;
+        emit ScoreUpdated(wallet, getScore(wallet));
     }
 
     // @dev txCount is sourced from the wallet's real OPN-chain transaction count
@@ -119,7 +167,7 @@ contract CreditScore is Ownable {
         emit TxCountUpdated(wallet, txCount);
     }
 
-    //  Score Computation 
+    //  Score Computation
 
     function getScore(address wallet) public view returns (uint256) {
         WalletData memory d = walletData[wallet];
@@ -131,9 +179,11 @@ contract CreditScore is Ownable {
             score += ACTIVE_WALLET_BONUS;
         }
 
-        // Repayment bonus (capped)
-        uint256 repBonus = d.totalRepayments * REPAYMENT_BONUS;
-        score += repBonus > MAX_REPAYMENT_BONUS ? MAX_REPAYMENT_BONUS : repBonus;
+        // Per-action activity bonuses (uncapped)
+        score += d.totalRepayments * REPAYMENT_BONUS;
+        score += d.totalSupplies * SUPPLY_BONUS;
+        score += d.totalDeposits * DEPOSIT_BONUS;
+        score += d.totalBorrows * BORROW_BONUS;
 
         // Long-term wallet bonus
         if (d.initialized && block.timestamp >= d.firstSeenTimestamp + LONGTERM_THRESHOLD) {
@@ -150,10 +200,10 @@ contract CreditScore is Ownable {
 
     function getTier(address wallet) public view returns (uint8) {
         uint256 score = getScore(wallet);
-        if (score >= 800) return 3; // Prime
-        if (score >= 500) return 2; // Neutral
-        if (score >= 300) return 1; // Subprime
-        return 0;                   // High Risk
+        if (score >= 1000) return 3; // Prime
+        if (score >= 320) return 2;  // Neutral
+        if (score >= 250) return 1;  // Subprime
+        return 0;                    // High Risk
     }
 
     /// @notice Borrow multiplier in bps (e.g. 15000 = 1.5x)
@@ -178,6 +228,9 @@ contract CreditScore is Ownable {
         uint256 baseline,
         uint256 activeWalletBonus,
         uint256 repaymentBonus,
+        uint256 supplyBonus,
+        uint256 depositBonus,
+        uint256 borrowBonus,
         uint256 longtermBonus,
         uint256 liquidationPenalty,
         uint256 total
@@ -185,8 +238,10 @@ contract CreditScore is Ownable {
         WalletData memory d = walletData[wallet];
         baseline = BASELINE;
         activeWalletBonus = d.txCount >= ACTIVE_WALLET_TX_THRESHOLD ? ACTIVE_WALLET_BONUS : 0;
-        uint256 rb = d.totalRepayments * REPAYMENT_BONUS;
-        repaymentBonus = rb > MAX_REPAYMENT_BONUS ? MAX_REPAYMENT_BONUS : rb;
+        repaymentBonus = d.totalRepayments * REPAYMENT_BONUS;
+        supplyBonus = d.totalSupplies * SUPPLY_BONUS;
+        depositBonus = d.totalDeposits * DEPOSIT_BONUS;
+        borrowBonus = d.totalBorrows * BORROW_BONUS;
         longtermBonus = (d.initialized && block.timestamp >= d.firstSeenTimestamp + LONGTERM_THRESHOLD) ? LONGTERM_BONUS : 0;
         liquidationPenalty = d.liquidations * LIQUIDATION_PENALTY;
         total = getScore(wallet);
@@ -198,14 +253,21 @@ contract CreditScore is Ownable {
 
     function _ensureInit(address wallet) internal {
         if (!walletData[wallet].initialized) {
-            walletData[wallet] = WalletData({
-                txCount: 0,
-                firstSeenTimestamp: block.timestamp,
-                totalRepayments: 0,
-                liquidations: 0,
-                lastUpdated: block.timestamp,
-                initialized: true
-            });
+            _init(wallet);
         }
+    }
+
+    function _init(address wallet) internal {
+        walletData[wallet] = WalletData({
+            txCount: 0,
+            firstSeenTimestamp: block.timestamp,
+            totalRepayments: 0,
+            totalSupplies: 0,
+            totalDeposits: 0,
+            totalBorrows: 0,
+            liquidations: 0,
+            lastUpdated: block.timestamp,
+            initialized: true
+        });
     }
 }

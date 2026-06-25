@@ -6,8 +6,6 @@ html, body {
   overflow-x: hidden;
 }
 
-
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -272,3 +270,8 @@ body {
     display: none !important;
   }
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin { animation: spin 1s linear infinite; }

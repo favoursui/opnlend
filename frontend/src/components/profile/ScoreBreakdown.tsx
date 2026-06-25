@@ -9,6 +9,9 @@ export default function ScoreBreakdown() {
     { label: "Baseline", value: breakdown.baseline, positive: true },
     { label: "Active wallet (tx ≥ 10)", value: breakdown.activeWalletBonus, positive: true },
     { label: "Loan repayment history", value: breakdown.repaymentBonus, positive: true },
+    { label: "Supply history", value: breakdown.supplyBonus, positive: true },
+    { label: "Collateral deposits", value: breakdown.depositBonus, positive: true },
+    { label: "Borrow history", value: breakdown.borrowBonus, positive: true },
     { label: "Long-term wallet (≥ 180d)", value: breakdown.longtermBonus, positive: true },
     { label: "Liquidations", value: -breakdown.liquidationPenalty, positive: false },
   ];

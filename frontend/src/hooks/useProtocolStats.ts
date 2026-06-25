@@ -6,7 +6,7 @@ export interface ProtocolStats {
   totalCollateral: string;
   totalTransactions: number;
   totalUsers: number;
-  history: { timestamp: number; totalSupplied: number; totalBorrowed: number }[];
+  history: { timestamp: number; totalSupplied: number; totalBorrowed: number; totalCollateral: number }[];
 }
 
 export function useProtocolStats() {

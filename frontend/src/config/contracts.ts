@@ -32,7 +32,7 @@ export const LENDING_POOL_ABI = [
   { name: "Repaid",            type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
   { name: "Liquidated",        type: "event", inputs: [{ name: "borrower", type: "address", indexed: true }, { name: "liquidator", type: "address", indexed: true }, { name: "debtRepaid", type: "uint256" }, { name: "collateralSeized", type: "uint256" }] },
   { name: "CollateralDeposited", type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
-  { name: "YieldClaimed", type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
+  { name: "CollateralWithdrawn", type: "event", inputs: [{ name: "user", type: "address", indexed: true }, { name: "amount", type: "uint256" }] },
 ] as const;
 
 export const LOAN_MANAGER_ABI = [
@@ -46,9 +46,9 @@ export const CREDIT_SCORE_ABI = [
   { name: "getBorrowMultiplierBps", type: "function", stateMutability: "view", inputs: [{ name: "wallet", type: "address" }], outputs: [{ type: "uint256" }] },
   { name: "getAprSurchargeBps", type: "function", stateMutability: "view", inputs: [{ name: "wallet", type: "address" }], outputs: [{ type: "int256" }] },
   { name: "getScoreBreakdown",  type: "function", stateMutability: "view", inputs: [{ name: "wallet", type: "address" }],
-    outputs: [{ name: "baseline", type: "uint256" }, { name: "activeWalletBonus", type: "uint256" }, { name: "repaymentBonus", type: "uint256" }, { name: "longtermBonus", type: "uint256" }, { name: "liquidationPenalty", type: "uint256" }, { name: "total", type: "uint256" }] },
+    outputs: [{ name: "baseline", type: "uint256" }, { name: "activeWalletBonus", type: "uint256" }, { name: "repaymentBonus", type: "uint256" }, { name: "supplyBonus", type: "uint256" }, { name: "depositBonus", type: "uint256" }, { name: "borrowBonus", type: "uint256" }, { name: "longtermBonus", type: "uint256" }, { name: "liquidationPenalty", type: "uint256" }, { name: "total", type: "uint256" }] },
   { name: "getWalletData",      type: "function", stateMutability: "view", inputs: [{ name: "wallet", type: "address" }],
-    outputs: [{ name: "txCount", type: "uint256" }, { name: "firstSeenTimestamp", type: "uint256" }, { name: "totalRepayments", type: "uint256" }, { name: "liquidations", type: "uint256" }, { name: "lastUpdated", type: "uint256" }, { name: "initialized", type: "bool" }] },
+    outputs: [{ name: "txCount", type: "uint256" }, { name: "firstSeenTimestamp", type: "uint256" }, { name: "totalRepayments", type: "uint256" }, { name: "totalSupplies", type: "uint256" }, { name: "totalDeposits", type: "uint256" }, { name: "totalBorrows", type: "uint256" }, { name: "liquidations", type: "uint256" }, { name: "lastUpdated", type: "uint256" }, { name: "initialized", type: "bool" }] },
 ] as const;
 
 export const ORACLE_ABI = [

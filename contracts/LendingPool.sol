@@ -121,6 +121,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         s.lastUpdated = block.timestamp;
         totalShares += sharesToMint;
         totalSupplied += msg.value;
+        creditScore.recordSupply(msg.sender);
         emit Supplied(msg.sender, msg.value, sharesToMint);
     }
 
@@ -139,6 +140,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         totalShares -= shareAmount;
         totalSupplied -= amount;
 
+        creditScore.recordSupplyWithdrawal(msg.sender);
         (bool ok,) = msg.sender.call{value: amount}("");
         require(ok, "LendingPool: transfer failed");
         emit SupplyWithdrawn(msg.sender, amount);
@@ -177,6 +179,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         positions[msg.sender].collateral += msg.value;
         positions[msg.sender].lastUpdated = block.timestamp;
         totalCollateral += msg.value;
+        creditScore.recordDeposit(msg.sender);
         emit CollateralDeposited(msg.sender, msg.value);
     }
 
@@ -194,6 +197,7 @@ contract LendingPool is Ownable, ReentrancyGuard {
         pos.collateral = newCollateral;
         pos.lastUpdated = block.timestamp;
         totalCollateral -= amount;
+        creditScore.recordCollateralWithdrawal(msg.sender);
         (bool ok,) = msg.sender.call{value: amount}("");
         require(ok, "LendingPool: transfer failed");
         emit CollateralWithdrawn(msg.sender, amount);

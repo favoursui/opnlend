@@ -4,7 +4,7 @@ import { useAccount } from "wagmi";
 import { CONTRACTS, CREDIT_SCORE_ABI } from "@/config/contracts";
 
 const ACTIVE_WALLET_TX_THRESHOLD = 10;
-const ACTIVE_WALLET_BONUS = 100;
+const ACTIVE_WALLET_BONUS = 25;
 const MAX_SCORE = 1000;
 
 export function useCreditScore(overrideAddress?: `0x${string}`) {
@@ -70,16 +70,22 @@ export function useCreditScore(overrideAddress?: `0x${string}`) {
       baseline: Number(breakdown[0]),
       activeWalletBonus: liveActiveBonus,
       repaymentBonus: Number(breakdown[2]),
-      longtermBonus: Number(breakdown[3]),
-      liquidationPenalty: Number(breakdown[4]),
+      supplyBonus: Number(breakdown[3]),
+      depositBonus: Number(breakdown[4]),
+      borrowBonus: Number(breakdown[5]),
+      longtermBonus: Number(breakdown[6]),
+      liquidationPenalty: Number(breakdown[7]),
       total: effectiveScore,
     } : null,
     walletData: walletData ? {
       txCount: effectiveTxCount,
       firstSeenTimestamp: Number(walletData[1]),
       totalRepayments: Number(walletData[2]),
-      liquidations: Number(walletData[3]),
-      initialized: walletData[5] as boolean,
+      totalSupplies: Number(walletData[3]),
+      totalDeposits: Number(walletData[4]),
+      totalBorrows: Number(walletData[5]),
+      liquidations: Number(walletData[6]),
+      initialized: walletData[8] as boolean,
     } : null,
     refetchScore,
   };

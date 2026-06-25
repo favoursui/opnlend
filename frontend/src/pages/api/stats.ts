@@ -29,14 +29,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const users = new Set<string>();
     let runningSupply = 0;
     let runningBorrow = 0;
-    const history: { timestamp: number; totalSupplied: number; totalBorrowed: number }[] = [];
+    let runningCollateral = 0;
+    const history: { timestamp: number; totalSupplied: number; totalBorrowed: number; totalCollateral: number }[] = [];
 
     for (const e of events ?? []) {
       if (e.user_address) users.add(e.user_address);
       if (e.event_name === "Supplied") runningSupply += e.amount;
+      if (e.event_name === "SupplyWithdrawn") runningSupply -= e.amount;
       if (e.event_name === "Borrowed") runningBorrow += e.amount;
       if (e.event_name === "Repaid") runningBorrow -= e.amount;
-      history.push({ timestamp: e.timestamp, totalSupplied: runningSupply, totalBorrowed: runningBorrow });
+      if (e.event_name === "CollateralDeposited") runningCollateral += e.amount;
+      if (e.event_name === "CollateralWithdrawn") runningCollateral -= e.amount;
+      // Clamp at 0: withdrawal amounts include accrued yield, which was never
+      // emitted as a Supplied event, so a running total could otherwise dip slightly
+      // negative. The headline totals come straight from the contract regardless.
+      history.push({
+        timestamp: e.timestamp,
+        totalSupplied: Math.max(0, runningSupply),
+        totalBorrowed: Math.max(0, runningBorrow),
+        totalCollateral: Math.max(0, runningCollateral),
+      });
     }
 
     return res.status(200).json({

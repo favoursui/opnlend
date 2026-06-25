@@ -2,6 +2,7 @@ import type { AppProps } from "next/app";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { wagmiConfig } from "@/config/wagmi";
 import Navbar from "@/components/layout/Navbar";
 import "@rainbow-me/rainbowkit/styles.css";
@@ -11,6 +12,13 @@ import Head from "next/head";
 const queryClient = new QueryClient();
 
 export default function App({ Component, pageProps }: AppProps) {
+  // Manual cron only runs occasionally, but the chain produces ~65k blocks/day.
+  // Fire a background catch-up sync on load so the indexer self-heals on normal
+  // visits — the /stats "Sync now" button is the deliberate manual trigger on top.
+  useEffect(() => {
+    fetch("/api/sync").catch(() => {});
+  }, []);
+
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>

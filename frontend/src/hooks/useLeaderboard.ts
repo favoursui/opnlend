@@ -18,42 +18,24 @@ export function useLeaderboard() {
   useEffect(() => {
     if (!client || !CONTRACTS.lendingPool) return;
 
+    let cancelled = false;
+
     async function load() {
       if (!client) return;
       setLoading(true);
       try {
-        const currentBlock = await client.getBlockNumber();
-        const fromBlock = currentBlock > 9000n ? currentBlock - 9000n : 0n;
+        // Discover the wallet set from the permanent protocol_events table via
+        // /api/wallets, NOT from a sliding on-chain block window. This is what keeps
+        // wallets from disappearing once their last activity is >9000 blocks old.
+        const res = await fetch("/api/wallets");
+        if (!res.ok) throw new Error("Failed to fetch wallets");
+        const { wallets } = await res.json();
+        const addresses: string[] = wallets ?? [];
 
-        // Discover wallets from Supplied, Borrowed, CollateralDeposited events
-        const [suppliedLogs, borrowedLogs, collateralLogs] = await Promise.all([
-          client.getLogs({
-            address: CONTRACTS.lendingPool,
-            event: LENDING_POOL_ABI.find((e) => e.name === "Supplied") as any,
-            fromBlock,
-            toBlock: "latest",
-          }),
-          client.getLogs({
-            address: CONTRACTS.lendingPool,
-            event: LENDING_POOL_ABI.find((e) => e.name === "Borrowed") as any,
-            fromBlock,
-            toBlock: "latest",
-          }),
-          client.getLogs({
-            address: CONTRACTS.lendingPool,
-            event: LENDING_POOL_ABI.find((e) => e.name === "CollateralDeposited") as any,
-            fromBlock,
-            toBlock: "latest",
-          }),
-        ]);
-
-        const addresses = new Set<string>();
-        [...suppliedLogs, ...borrowedLogs, ...collateralLogs].forEach((log: any) => {
-          if (log.args?.user) addresses.add(log.args.user);
-        });
-
+        // Per-wallet score/tier/limit/HF are read LIVE from the contracts so the
+        // ranking is always current.
         const results: LeaderboardEntry[] = await Promise.all(
-          Array.from(addresses).map(async (addr) => {
+          addresses.map(async (addr) => {
             const address = addr as `0x${string}`;
             const [score, tier, limit, hf] = await Promise.all([
               client.readContract({ address: CONTRACTS.creditScore, abi: CREDIT_SCORE_ABI, functionName: "getScore", args: [address] }),
@@ -72,15 +54,18 @@ export function useLeaderboard() {
         );
 
         results.sort((a, b) => b.score - a.score);
-        setEntries(results);
+        if (!cancelled) setEntries(results);
       } catch (e) {
         console.error("Leaderboard load failed:", e);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
     load();
+    return () => {
+      cancelled = true;
+    };
   }, [client]);
 
   return { entries, loading };

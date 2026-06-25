@@ -55,6 +55,8 @@ async function main() {
   console.log("\nWiring permissions...");
   await creditScore.setLoanManager(await loanManager.getAddress());
   await creditScore.setLiquidator(await liquidator.getAddress());
+  // LendingPool writes score on supply()/depositCollateral(), so it must be authorized too.
+  await creditScore.setLendingPool(await lendingPool.getAddress());
   await lendingPool.setLoanManager(await loanManager.getAddress());
   await lendingPool.setLiquidator(await liquidator.getAddress());
   console.log("Done.");

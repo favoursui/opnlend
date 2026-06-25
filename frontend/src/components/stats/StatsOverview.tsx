@@ -41,6 +41,15 @@ export default function StatsOverview() {
               pointRadius: 2,
               borderDash: [4, 3],
             },
+            {
+              label: "Total collateral deposited",
+              data: stats.history.map((h) => h.totalCollateral),
+              borderColor: "#3b82f6",
+              backgroundColor: "rgba(59,130,246,0.08)",
+              fill: true,
+              tension: 0.3,
+              pointRadius: 2,
+            },
           ],
         },
         options: {
@@ -107,9 +116,13 @@ export default function StatsOverview() {
               <span style={{ width: 10, height: 10, borderRadius: 2, background: "#f59e0b", display: "inline-block" }} />
               Total borrowed
             </span>
+            <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+              <span style={{ width: 10, height: 10, borderRadius: 2, background: "#3b82f6", display: "inline-block" }} />
+              Total collateral deposited
+            </span>
           </div>
           <div style={{ position: "relative", height: 280 }}>
-            <canvas ref={canvasRef} role="img" aria-label="Line chart of total supplied and borrowed IOPN over time" />
+            <canvas ref={canvasRef} role="img" aria-label="Line chart of total supplied, borrowed, and collateral deposited IOPN over time" />
           </div>
         </div>
       ) : (
